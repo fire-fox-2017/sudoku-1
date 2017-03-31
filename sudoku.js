@@ -25,71 +25,77 @@ class Sudoku {
     // find index of 0
     // let zero = this._board.indexOf('0');
 
-    for (let z = 0 ; z < zeroIndex.length ; z++) {
-      let zero = zeroIndex[z];
+    while (zeroIndex.length > 0) {
 
-      if(DEBUG) console.log(`zero = ${zero}`);
+      for (let z = 0 ; z < zeroIndex.length ; z++) {
+        let zero = zeroIndex[z];
 
-      // check possible answer with the row, col, grid
-      let answer = ['1','2','3','4','5','6','7','8','9'];
+        if(DEBUG) console.log(`zero = ${zero}`);
 
-      // check horizontally
-      // get start index of row
-      let ri = Math.floor(zero/9) * 9;
-      if(DEBUG) console.log(`start ri = ${ri}`)
-      let rend = ri+9;
-      for ( ; ri < rend ; ri++ ) {
-        if(DEBUG) console.log(`ri = ${ri}`)
-        let pos = answer.indexOf(this._board[ri]);
+        // check possible answer with the row, col, grid
+        let answer = ['1','2','3','4','5','6','7','8','9'];
 
-        // if number is found in the possible answer, delete from possible answer
-        if (pos > -1)
-          answer.splice(pos,1);
-      }
-      if(DEBUG) console.log(`check horizontally ---> answer = ${answer}`);
+        // check horizontally
+        // get start index of row
+        let ri = Math.floor(zero/9) * 9;
+        if(DEBUG) console.log(`start ri = ${ri}`)
+        let rend = ri+9;
+        for ( ; ri < rend ; ri++ ) {
+          if(DEBUG) console.log(`ri = ${ri}`)
+          let pos = answer.indexOf(this._board[ri]);
 
-
-      // check vertically
-      // get start index of col
-      let ci = zero % 9;
-      if(DEBUG) console.log(`start ci = ${ci}`)
-      let cend = ci + 73;
-      for ( ; ci < cend ; ci+=9 ) {
-        if(DEBUG) console.log(`ci = ${ci}`)
-        let pos = answer.indexOf(this._board[ci]);
-        if(DEBUG) console.log(`pos = ${pos}`)
-        if (pos > -1)
-          answer.splice(pos,1);
-      }
-      if(DEBUG) console.log(`check vertically ---> answer = ${answer}`);
-
-      // check grid
-      let gi = (Math.floor((zero%9)/3) * 3) + (Math.floor(zero/27) * 27);
-      if(DEBUG) console.log(`start gi = ${gi}`)
-      for ( let x = 0 ; x < 3 ; x++ ) {
-        for (let y = 0 ; y < 3 ; y++) {
-
-          let pos = answer.indexOf(this._board[(gi+(x*9))+y]);
-          if(DEBUG) console.log(`this._board[${(gi+(x*9))+y}] = ${this._board[(gi+(x*9))+y]}, pos = ${pos}`)
+          // if number is found in the possible answer, delete from possible answer
           if (pos > -1)
             answer.splice(pos,1);
         }
-      }
-      if(DEBUG) console.log(`check grid ---> answer = ${answer}`);
-
-      // after checking row, col, grid
-      //  check if possible answer is only 1, if it is only 1, then assign zero to that answer.
-      if (answer.length == 1){
-        this._board[zero] = answer[0];
-
-        // remove this index from zeroIndex
-        // zeroIndex.splice(zero,1);
-      }
-
-      if(DEBUG) console.log(this.board());
-    } // end of for zeroIndex
+        if(DEBUG) console.log(`check horizontally ---> answer = ${answer}`);
 
 
+        // check vertically
+        // get start index of col
+        let ci = zero % 9;
+        if(DEBUG) console.log(`start ci = ${ci}`)
+        let cend = ci + 73;
+        for ( ; ci < cend ; ci+=9 ) {
+          if(DEBUG) console.log(`ci = ${ci}`)
+          let pos = answer.indexOf(this._board[ci]);
+          if(DEBUG) console.log(`pos = ${pos}`)
+          if (pos > -1)
+            answer.splice(pos,1);
+        }
+        if(DEBUG) console.log(`check vertically ---> answer = ${answer}`);
+
+        // check grid
+        let gi = (Math.floor((zero%9)/3) * 3) + (Math.floor(zero/27) * 27);
+        if(DEBUG) console.log(`start gi = ${gi}`)
+        for ( let x = 0 ; x < 3 ; x++ ) {
+          for (let y = 0 ; y < 3 ; y++) {
+
+            let pos = answer.indexOf(this._board[(gi+(x*9))+y]);
+            if(DEBUG) console.log(`this._board[${(gi+(x*9))+y}] = ${this._board[(gi+(x*9))+y]}, pos = ${pos}`)
+            if (pos > -1)
+              answer.splice(pos,1);
+          }
+        }
+        if(DEBUG) console.log(`check grid ---> answer = ${answer}`);
+
+        // after checking row, col, grid
+        //  check if possible answer is only 1, if it is only 1, then assign zero to that answer.
+        if (answer.length == 1){
+          this._board[zero] = answer[0];
+
+          // remove this index from zeroIndex
+          // zeroIndex.splice(zero,1);
+        }
+
+        if(DEBUG) console.log(this.board());
+      } // end of for zeroIndex
+
+      console.log(this.board());
+      // get the index of zeros again
+      zeroIndex = this.findZeroIndex();
+      console.log(`zeroIndex = ${zeroIndex}, length = ${zeroIndex.length}`);
+  } //end of while zeroIndex
 
   }
 
@@ -139,19 +145,6 @@ var game = new Sudoku(board_string);
 // Remember: this will just fill out what it can and not "guess"
 // console.log(game._board);
 
-game.solve();
-
-console.log(game.board());
-
-game.solve();
-
-console.log(game.board());
-
-game.solve();
-
-console.log(game.board());
-
-console.log("-------------------------------------")
 game.solve();
 
 console.log(game.board());
