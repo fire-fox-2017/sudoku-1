@@ -136,7 +136,11 @@ class Sudoku {
 var fs = require('fs')
 var board_string = fs.readFileSync('set-01_sample.unsolved.txt')
   .toString()
-  .split("\n")[0]
+  .split("\n")[1]
+
+// var board_string = fs.readFileSync('set-02_project-euler_50-easy-puzzles.txt')
+//   .toString()
+//   .split("\n")[5]
 
 console.log(board_string);
 
