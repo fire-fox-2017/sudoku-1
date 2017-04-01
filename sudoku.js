@@ -5,15 +5,18 @@ class Sudoku {
     this.boardData = board_string.match(/\d{9}/g);
     this.playBoard = [];
     this.smallBlocks = [];
-    this.filledBoard = [];
-
-    // creates objects for the elements
+    this.initBoard = [];
     this.elements =[]
 
+    this.board();
+    this.blocks();
+    this.createElem();
+    
 
   }
 
   createElem() {
+	// creates objects for the elements
     for (let i = 0; i < this.playBoard.length; i++) {
       for (let j = 0; j < this.playBoard.length; j++) {
         let status = "";
@@ -32,11 +35,47 @@ class Sudoku {
   }
 
   solve() {
-    // initial fill
-    let row = 0;
+	// try to fill all, no block check yet
+	
+	for (let rowIndex = 0; rowIndex < this.playBoard.length; rowIndex++) {
 
+	  let row = rowIndex;
+	
+	for (let colIndex = 0; colIndex < this.playBoard.length; colIndex++) {
+		
+	  let col = colIndex;
+	
+    let msg = "";
+	let guess = 0;
 
+	do { 
+	guess++;  
+	
+	for (let i = 0; i < this.elements.length; i++) {
+	  let elem = this.elements[i];
+	  if (elem.row === row && elem.col === col) {
+//		  console.log(elem);
+		  if (elem.stat === "free") {
+			  elem.number = String(guess);
+			  this.playBoard[row].splice(col, 1, String(guess));
+			  msg = `Row ${row} col ${col} is filled with ${guess}`;
+//			  console.log(`Guess? ${guess}`);
+//			  console.log(`Row duplicate? ${this.isRowDupl(row)}`);
+//			  console.log(`Col duplicate? ${this.isColDupl(col)}`);
+//			  console.log(`Block duplicate? ${this.isBlockDupl(row, col)}`);
+//			  console.log(elem);
+		  }  else {
+//		    msg = `Element in row ${row} col ${col} is fixed!`;
+	      }
+	  }
+	}
 
+	} while ((this.isRowDupl(row) || this.isColDupl(col) || this.isBlockDupl(row, col)) && guess < 9);
+//	console.log(msg);
+	
+  }
+  
+  }
 
   }
 
@@ -44,11 +83,14 @@ class Sudoku {
   board() {
     for (let i = 0; i < this.boardData.length; i++) {
       this.playBoard.push([]);
+      this.initBoard.push([]);
       for (let j = 0; j < this.boardData.length; j++) {
         if (this.boardData[i][j] === "0") {
           this.playBoard[i].push(' ');
+          this.initBoard[i].push(' ');
         } else {
           this.playBoard[i].push(this.boardData[i][j]);
+          this.initBoard[i].push(this.boardData[i][j]);
         }
       }
     }
@@ -91,8 +133,36 @@ class Sudoku {
 
     return this.smallBlocks;
   }
-
-  rowCheck(row) {
+  
+  rowColToBlock(row, col) {
+    if (row < 3) {
+		if (col < 3) {
+			return 0;
+		} else if (col < 6) {
+			return 1;
+		} else {
+			return 2;
+		}
+	} else if (row < 6) {
+		if (col < 3) {
+			return 3;
+		} else if (col < 6) {
+			return 4;
+		} else {
+			return 5;
+		}
+	} else {
+		if (col < 3) {
+			return 6;
+		} else if (col < 6) {
+			return 7;
+		} else {
+			return 8;
+		}
+	}	  
+  }
+  
+  isRowEmpty(row) {
     //check for empty column
     let digit = /[0-9]/;
     let nonDigCount = 0;
@@ -102,32 +172,47 @@ class Sudoku {
         nonDigCount += 1;
       }
     }
-
-    //if no empty column, check the duplicates in row
+    
     if (nonDigCount > 0) {
-      return false;
+      return true;
     } else {
-      let duplicates = [];
-      let runningItems = [this.playBoard[row][0]];
-      let col = 1;
-      while (col < this.playBoard.length) {
-        for (let i = 0; i < runningItems.length; i++) {
-          if (this.playBoard[row][col] === runningItems[i]) {
-            duplicates.push(runningItems[i]);
-          }
+      return false; 
+	}
+  }
+  
+  isRowDupl(row) {
+    //check the duplicates in row
+    let duplicates = [];
+
+    let col = 0;
+    while (col < this.playBoard.length && /\s/.test(this.playBoard[row][col])) {
+		col++;
+	}
+    
+    let runningItems = [this.playBoard[row][col]];
+    
+    col = 0;
+    while (col < this.playBoard.length) {
+      for (let i = 0; i < runningItems.length; i++) {
+		let currentNumber = this.playBoard[row][col];
+        if (!/\s/.test(currentNumber) && currentNumber === runningItems[i]) {
+          duplicates.push(runningItems[i]);
         }
-        runningItems.push(this.playBoard[row][col]);
-        col++;
       }
-      if (duplicates.length > 0) {
-        return false;
-      } else {
-        return true;
-      }
+      runningItems.push(this.playBoard[row][col]);
+      col++;
     }
+    // console.log(duplicates);
+    
+    if (duplicates.length > 1) {
+      return true;
+    } else {
+      return false;
+    }
+    
   }
 
-  colCheck(col) {
+  isColEmpty(col) {
     //check for empty row
     let digit = /[0-9]/;
     let nonDigCount = 0;
@@ -137,34 +222,49 @@ class Sudoku {
         nonDigCount += 1;
       }
     }
-
-    //if no empty row, check the duplicates in column
+    
     if (nonDigCount > 0) {
-      return false;
+      return true;
     } else {
-      let duplicates = [];
-      let runningItems = [this.playBoard[0][col]];
-      let row = 1;
+      return false;
+    }	
+  }
+
+  isColDupl(col) {
+    //check the duplicates in column
+    
+    let duplicates = [];
+
+    let row = 0;
+    while (row < this.playBoard.length && /\s/.test(this.playBoard[row][col])) {
+		row++;
+	}
+    
+    let runningItems = [this.playBoard[row][col]];
+    
+    row = 0;
       while (row < this.playBoard.length) {
         for (let i = 0; i < runningItems.length; i++) {
-          if (this.playBoard[row][col] === runningItems[i]) {
+		  let currentNumber = this.playBoard[row][col];
+          if (!/\s/.test(currentNumber) && currentNumber === runningItems[i]) {
             duplicates.push(runningItems[i]);
           }
         }
         runningItems.push(this.playBoard[row][col]);
         row++;
       }
-      if (duplicates.length > 0) {
-        return false;
-      } else {
+      
+      if (duplicates.length > 1) {
         return true;
+      } else {
+        return false;
       }
-    }
+  
   }
-
-  blockCheck(block) {
-    //check for empty element
-    let digit = /[0-9]/;
+  
+  isBlockEmpty(block) {
+	//check for empty element
+	let digit = /[0-9]/;
     let nonDigCount = 0;
 
     for (let i = 0; i < this.smallBlocks[block]; i++) {
@@ -172,29 +272,57 @@ class Sudoku {
         nonDigCount += 1;
       }
     }
-
-    //if no empty element, check the duplicates within the block
+    
     if (nonDigCount > 0) {
-      return false;
+      return true;
     } else {
+      return false;
+	}
+  }
+
+  isBlockDupl(row, col) {
+    //check the duplicates within the block
+      
+      let block = this.rowColToBlock(row, col);
+      let blockItem = this.smallBlocks[block];
+//     console.log(`Block: ${block}`);
+      
       let duplicates = [];
-      let runningItems = [this.smallBlocks[block][0]];
-      let index = 1;
-      while (index < this.smallBlocks[block].length) {
+      
+      let index = 0;
+      let rowIndex = blockItem[index][0];
+      let colIndex = blockItem[index][1];
+      while (index < blockItem.length && /\s/.test(this.playBoard[rowIndex][colIndex])) {
+		index++;
+		rowIndex = blockItem[index][0];
+        colIndex = blockItem[index][1];
+   	  }
+    
+      let runningItems = [this.playBoard[rowIndex][colIndex]];
+      
+      index = 0;
+      while (index < blockItem.length) {
+		rowIndex = blockItem[index][0];
+        colIndex = blockItem[index][1];
+//        console.log(`Elem: ${blockItem[index]}`);
         for (let i = 0; i < runningItems.length; i++) {
-          if (this.smallBlocks[block][i] === runningItems[i]) {
+		  let currentNumber = this.playBoard[rowIndex][colIndex];
+          if (!/\s/.test(currentNumber) && currentNumber === runningItems[i]) {
             duplicates.push(runningItems[i]);
           }
         }
-        runningItems.push(this.smallBlocks[block][index]);
+        runningItems.push(this.playBoard[rowIndex][colIndex]);
         index++;
       }
-      if (duplicates.length > 0) {
-        return false;
-      } else {
+      
+//      console.log(`Block duplicate: ${duplicates}`);
+      if (duplicates.length > 1) {
         return true;
+
+      } else {
+        return false;
       }
-    }
+    
   }
 
 }
@@ -211,8 +339,13 @@ var game = new Sudoku(board_string)
 // Remember: this will just fill out what it can and not "guess"
 game.solve()
 
-console.log(game.board())
-// game.board();
-game.blocks();
-game.createElem();
-console.log(game.elements)
+// console.log(game.elements);
+console.log(game.initBoard);
+console.log();
+console.log(game.playBoard);
+//let block = 0;
+//let blockItem = game.smallBlocks[block];
+//console.log(blockItem[0]);
+//console.log(game.isBlockDupl(1,8));
+
+
