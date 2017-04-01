@@ -5,9 +5,38 @@ class Sudoku {
     this.boardData = board_string.match(/\d{9}/g);
     this.playBoard = [];
     this.smallBlocks = [];
+    this.filledBoard = [];
+
+    // creates objects for the elements
+    this.elements =[]
+
+
+  }
+
+  createElem() {
+    for (let i = 0; i < this.playBoard.length; i++) {
+      for (let j = 0; j < this.playBoard.length; j++) {
+        let status = "";
+        if (/\s/.test(this.playBoard[i][j])) {
+          status = "free";
+        } else {
+          status = "fixed";
+        }
+        let obj = {number: this.playBoard[i][j],
+                   row: i,
+                   col: j,
+                   stat: status};
+        this.elements.push(obj);
+      }
+    }
   }
 
   solve() {
+    // initial fill
+    let row = 0;
+
+
+
 
   }
 
@@ -183,5 +212,7 @@ var game = new Sudoku(board_string)
 game.solve()
 
 console.log(game.board())
-game.board();
+// game.board();
 game.blocks();
+game.createElem();
+console.log(game.elements)
