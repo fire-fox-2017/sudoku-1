@@ -41,7 +41,7 @@ class Sudoku {
         }
       }
       temp =hapusKosong(temp);
-      // console.log(temp);
+      console.log(temp);
 
       for(let i=x;i<=(baris+2);i++){
         for(let j=y;j<=(kolom+2);j++){
@@ -98,14 +98,35 @@ class Sudoku {
     }
 
 
-    for(let i=0;i<=6;i=i+3){
-      for (let j=0;j<=6;j=j+3) {
-         this.digit=['1','2','3','4','5','6','7','8','9',]
-         this.boardUrut = isiKotak(i,j,this.boardUrut,this.digit);
-      }
+for(let i=0;i<=6;i=i+3){
+  for(let j=0;j<=6;j=j+3){
 
-    }
+    this.boardUrut = isiKotak(i,j,this.boardUrut,this.digit);
 
+
+  }
+
+
+
+
+
+}
+
+    // this.boardUrut = isiKotak(0,3,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(0,6,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(3,0,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(3,3,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(3,6,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(6,0,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(6,3,this.boardUrut,this.digit);
+    // this.digit=['1','2','3','4','5','6','7','8','9',]
+    // this.boardUrut = isiKotak(6,6,this.boardUrut,this.digit);
 
   }
 
