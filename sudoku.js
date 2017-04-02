@@ -45,25 +45,11 @@ class Sudoku {
     // Mengembalikan true jika tidak ada value pada blok yang sama
     let columnStart = Math.floor(j / 3) * 3;
     let rowStart = Math.floor(i / 3) * 3;
-    for (let k = rowStart; k < Math.sqrt(this.BOARD_LENGTH); k++) {
-      for (let l = columnStart; l < Math.sqrt(this.BOARD_LENGTH); l++) {
+    for (let k = rowStart; k < Math.sqrt(this.BOARD_LENGTH) + rowStart; k++) {
+      for (let l = columnStart; l < Math.sqrt(this.BOARD_LENGTH) + columnStart; l++) {
         if (value == this.content[k][l]) {
           return false;
         }
-      }
-    }
-    return true;
-  }
-
-  checkSudoku () {
-    for (let i = 0; i < this.BOARD_LENGTH; i++) {
-      for (let j = 0; j < this.BOARD_LENGTH; j++) {
-        let value = this.content[i][j];
-        this.content[i][j] = 0;
-        if (!(this.checkRow(value, i, j) && this.checkColumn(value, i, j) && this.checkBlock(value, i, j))) {
-          return false;
-        }
-        this.content[i][j] = value;
       }
     }
     return true;
@@ -82,40 +68,7 @@ class Sudoku {
               break;
             }
           }
-          // Cek 2 kondisi terpenuhi
-          if (this.content[i][j] == 0) {
-            for (let k = 1; k < 10; k++) {
-              if (this.checkRow(k, i, j) && this.checkColumn(k, i, j)) {
-                this.content[i][j] = k;
-                break;
-              }
-            }
-          }
-          if (this.content[i][j] == 0) {
-            for (let k = 1; k < 10; k++) {
-              if (this.checkRow(k, i, j) && this.checkBlock(k, i, j)) {
-                this.content[i][j] = k;
-                break;
-              }
-            }
-          }
-          if (this.content[i][j] == 0) {
-            for (let k = 1; k < 10; k++) {
-              if (this.checkColumn(k, i, j) && this.checkBlock(k, i, j)) {
-                this.content[i][j] = k;
-                break;
-              }
-            }
-          }
-          // Cek salah satu kondisi terpenuhi
-          if (this.content[i][j] == 0) {
-            for (let k = 1; k < 10; k++) {
-              if (this.checkRow(k, i, j) || this.checkColumn(k, i, j) || this.checkBlock(k, i, j)) {
-                this.content[i][j] = k;
-                break;
-              }
-            }
-          }
+
         }
       }
     }
@@ -164,5 +117,3 @@ console.log(game.board());
 game.solve();
 console.log("Sudoku board state after solved");
 console.log(game.board());
-console.log("Is sudoku valid?");
-console.log(game.checkSudoku());
