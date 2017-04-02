@@ -45,8 +45,8 @@ class Sudoku {
     // Mengembalikan true jika tidak ada value pada blok yang sama
     let columnStart = Math.floor(j / 3) * 3;
     let rowStart = Math.floor(i / 3) * 3;
-    for (let k = 0; k < Math.sqrt(this.BOARD_LENGTH); k++) {
-      for (let l = 0; l < Math.sqrt(this.BOARD_LENGTH); l++) {
+    for (let k = rowStart; k < Math.sqrt(this.BOARD_LENGTH); k++) {
+      for (let l = columnStart; l < Math.sqrt(this.BOARD_LENGTH); l++) {
         if (value == this.content[k][l]) {
           return false;
         }
