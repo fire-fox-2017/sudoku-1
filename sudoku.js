@@ -31,11 +31,11 @@ class Sudoku {
         if(this._arrBoad[i][j]=='0'){
             let tempIndex=this.checkIGroup(i+','+j);
             let tempArr=this.checkGroup(tempIndex);
-            tempArr=this.LineV(tempArr,i,j);
-            tempArr=this.LineH(tempArr,i,j);
+            tempArr=this.checkRow(tempArr,i,j,'j');
+            tempArr=this.checkRow(tempArr,i,j,'i');
             tempArr=tempArr.sort();
             if(tempArr.length>0){
-            this._arrBoad[i][j]=tempArr[0];
+            this._arrBoad[i][j]=tempArr[this.randomInd(tempArr.length)];
             }else{
               let temp=Math.floor(Math.random()*9)+1;
               this._arrBoad[i][j]=temp.toString();
@@ -82,15 +82,22 @@ class Sudoku {
     return arrResult;
   }
 
-  LineV(arr,indI,indJ){
+  checkRow(arr,indI,indJ,str){
     let arrTemp=[];
     let a=[];
     let arrResult=[];
     for(let i=0;i<9;i++){
       if(indJ!==i){
-          if(this._arrBoad[indI][i]!=='0'){
-            //console.log("value "+this._arrBoad[indI][i]+" i "+arrI+" j "+i);
-            arrTemp.push(this._arrBoad[indI][i]);
+          if(str=='j'){
+            if(this._arrBoad[indI][i]!=='0'){
+              //console.log("value "+this._arrBoad[indI][i]+" i "+arrI+" j "+i);
+              arrTemp.push(this._arrBoad[indI][i]);
+            }
+          }else {
+            if(this._arrBoad[i][indJ]!=='0'){
+              //console.log("value "+this._arrBoad[indI][i]+" i "+arrI+" j "+i);
+              arrTemp.push(this._arrBoad[i][indJ]);
+            }
           }
       }
     }
@@ -110,32 +117,9 @@ class Sudoku {
     return arrResult;
     }
 
-  LineH(arr,indI,indJ){
-    let arrTemp=[];
-    let a=[];
-    let arrResult=[];
-    for(let i=0;i<9;i++){
-      if(indI!==i){
-          if(this._arrBoad[i][indJ]!=='0'){
-            //console.log("value "+this._arrBoad[indI][i]+" i "+arrI+" j "+i);
-            arrTemp.push(this._arrBoad[i][indJ]);
-          }
-      }
-    }
-    for(let j=0;j<arrTemp.length;j++){
-      for(let i=0;i<arr.length;i++){
-        let temp=arrTemp[j];
-        if(arr[i]==temp){
-          a.push(arr[i]);
-        }
-      }
-    }
-    let Sarr=arr.join("");
-    for(let j=0;j<a.length;j++){
-      Sarr=Sarr.replace(a[j],"");
-    }
-    arrResult=Sarr.split("");
-    return arrResult;
+    randomInd(ind){
+      let temp=Math.floor((Math.random()*ind));
+      return temp;
     }
   }
 // The file has newlines at the end of each line,
