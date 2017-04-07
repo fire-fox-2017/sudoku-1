@@ -1,12 +1,28 @@
 "use strict"
 
 class Sudoku {
-  constructor(board_string) {}
+  constructor(board_string) {
+    this.str = board_string
+
+  }
 
   solve() {}
 
   // Returns a string representing the current state of the board
-  board() {}
+  board() {
+    let board = [];
+    let n = 0;
+    for (let i=0; i<9; i++){
+      board.push([])
+      for (let j=0; j<9; j++){
+        board[i].push(Number(this.str[n]));
+        n++;
+      }
+    }
+    return board
+  }
+
+
 }
 
 // The file has newlines at the end of each line,
@@ -19,6 +35,6 @@ var board_string = fs.readFileSync('set-01_sample.unsolved.txt')
 var game = new Sudoku(board_string)
 
 // Remember: this will just fill out what it can and not "guess"
-game.solve()
+// game.solve()
 
 console.log(game.board())
