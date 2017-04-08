@@ -3,296 +3,194 @@
 class Sudoku {
   constructor(board_string) {
     this.boardData = board_string.match(/\d{9}/g);
-    this.playBoard = [];
-    this.smallBlocks = [];
     this.initBoard = [];
-    this.elements =[]
-
-    this.board();
-    this.blocks();
-    this.createElem();
-
-
+    this.fixedElem = {};
+    this.freeElem = {};
+    this.fixedCount = 0;
+    this.freeCount = 0;
+    this.solvePath = [];
+    this.numInPath = [];
   }
 
-  createElem() {
-	// creates objects for the elements
-    for (let i = 0; i < this.playBoard.length; i++) {
-      for (let j = 0; j < this.playBoard.length; j++) {
-        let status = "";
-        if (/\s/.test(this.playBoard[i][j])) {
-          status = "free";
-        } else {
-          status = "fixed";
+  solver() {
+
+    let maxPos = this.solvePath.length;
+    let elem = this.freeElem;
+    for (let i = 0; i < this.initBoard.length; i++) {
+      for (let j = 0; j < this.initBoard.length; j ++) {
+        for (let k = 0; k < maxPos; k++) {
+          if (elem[k].row === i && elem[k].col === j) {
+            let n = 0;
+            do {
+              n++;
+              elem[k].number = n;
+            } while(this.isAnyDupl() && n <= 9);
+            if (n > 9) {
+              elem[k].number = 0;
+            }
+          }
         }
-        let obj = {number: this.playBoard[i][j],
-                   row: i,
-                   col: j,
-                   stat: status};
-        this.elements.push(obj);
       }
     }
   }
 
   solve() {
-
-    // do {
-    //   for (let row = 0; row < this.playBoard.length; row++) {
-    //     for (let col = 0; col < this.playBoard.length; col++) {
-    //         for (let i = 0; i < this.elements.length; i++) {
-    //           let guess = Math.floor(Math.random()*9)+1;
-    //           let elem = this.elements[i];
-    //           if (elem.row === row && elem.col === col) {
-    //             if (elem.stat === "free") {
-    //               this.playBoard[row].splice(col, 1, String(guess));
-    //             }
-    //           }
-    //         }
-    //         console.log(`col ${col} dupl? ${this.isColDupl(col)}`);
-    //       }
-    //       console.log(`row ${row} dupl? ${this.isRowDupl(row)}`);
-    //     }
-    //
-    // } while (this.isAnyDupl());
-
-
-
-    for (let row = 0; row < this.playBoard.length; row++) {
-      do {
-        do {
-          for (let col = 0; col< this.playBoard.length; col++) {
-            let msg = "";
-            let guess = Math.floor(Math.random()*9)+1;
-            for (let i = 0; i < this.elements.length; i++) {
-              let elem = this.elements[i];
-              if (elem.row === row && elem.col === col) {
-                console.log(elem);
-                if (elem.stat === "free") {
-                  elem.number = String(guess);
-                  this.playBoard[row].splice(col, 1, String(guess));
-                  msg = `Row ${row} col ${col} is filled with ${guess}`;
-                  console.log(`Guess? ${guess}`);
-                  console.log(`Row duplicate? ${this.isRowDupl(row)}`);
-                  console.log(`Col duplicate? ${this.isColDupl(col)}`);
-                  console.log(`Block duplicate? ${this.isBlockDupl(row, col)}`);
-                  console.log(elem);
-                } else {
-                  msg = `Element in row ${row} col ${col} is fixed!`;
-                }
-              }
-            }
-          }
-        } while (this.isRowEmpty(row));
-      } while (this.isRowDupl(row));
-    }
-
-
+    this.solver();
   }
+
 
   // Returns a string representing the current state of the board
   board() {
     for (let i = 0; i < this.boardData.length; i++) {
-      this.playBoard.push([]);
       this.initBoard.push([]);
       for (let j = 0; j < this.boardData.length; j++) {
         if (this.boardData[i][j] === "0") {
-          this.playBoard[i].push(' ');
-          this.initBoard[i].push(' ');
+          let block = this.rowColToBlock(i,j);
+          this.freeElem[`${this.freeCount}`] = {id: this.freeCount,
+                                                row: i,
+                                                col: j,
+                                                block: block,
+                                                number: 0,
+                                                traceVal: 0};
+          this.initBoard[i].push(0);
+          this.solvePath.push([i,j]);
+          this.numInPath.push(0);
+          this.freeCount += 1;
         } else {
-          this.playBoard[i].push(this.boardData[i][j]);
-          this.initBoard[i].push(this.boardData[i][j]);
+          let num = Number(this.boardData[i][j]);
+          let block = this.rowColToBlock(i,j);
+          this.fixedElem[`${this.fixedCount}`] = {id: this.fixedCount,
+                                                  row: i,
+                                                  col: j,
+                                                  block: block,
+                                                  number: num};
+          this.initBoard[i].push(num);
+          this.fixedCount += 1;
         }
       }
     }
-    return this.playBoard;
+    return this.initBoard;
   }
 
-  blocks() {
-    //creates 9 smaller blocks
-    let size = 3;
-
-    for (let n = 0; n < size; n++) {
-      let block = [];
-      for (let i = 0; i < size; i++) {
-        for (let j = size*n; j < size*(n+1); j++) {
-          block.push([i,j]);
+  showBoard() {
+    let showBoard = [];
+    for (let row = 0; row < this.initBoard.length; row++) {
+      showBoard.push([]);
+      for (let col = 0; col < this.initBoard.length; col++) {
+        for (let i = 0; i < this.fixedCount; i++) {
+          let fixedElem = this.fixedElem[String(i)];
+          if (fixedElem.row === row && fixedElem.col === col) {
+            showBoard[row].push(String(fixedElem.number));
+          }
+        }
+        for (let j = 0; j < this.freeCount; j++) {
+          let freeElem = this.freeElem[String(j)];
+          if (freeElem.row === row && freeElem.col === col && freeElem.number > 0) {
+            showBoard[row].push(String(freeElem.number));
+          } else if (freeElem.row === row && freeElem.col === col && freeElem.number === 0) {
+            showBoard[row].push(" ");
+          }
         }
       }
-      this.smallBlocks.push(block);
     }
-
-    for (let n = 0; n < size; n++) {
-      let block = [];
-      for (let i = size; i < size*2; i++) {
-        for (let j = size*n; j < size*(n+1); j++) {
-          block.push([i,j]);
-        }
-      }
-      this.smallBlocks.push(block);
-    }
-
-    for (let n = 0; n < size; n++) {
-      let block = [];
-      for (let i = size*2; i < size*3; i++) {
-        for (let j = size*n; j < size*(n+1); j++) {
-          block.push([i,j]);
-        }
-      }
-      this.smallBlocks.push(block);
-    }
-
-    return this.smallBlocks;
-  }
+    return showBoard;
+}
 
   rowColToBlock(row, col) {
-    if (row < 3) {
-		if (col < 3) {
-			return 0;
-		} else if (col < 6) {
-			return 1;
-		} else {
-			return 2;
-		}
-	} else if (row < 6) {
-		if (col < 3) {
-			return 3;
-		} else if (col < 6) {
-			return 4;
-		} else {
-			return 5;
-		}
-	} else {
-		if (col < 3) {
-			return 6;
-		} else if (col < 6) {
-			return 7;
-		} else {
-			return 8;
-		}
-	}
-  }
-
-  isAnyEmpty() {
-    let rowEmpty = 0;
-    let colEmpty = 0;
-    // let blockEmpty = 0;
-
-    for (let row = 0; row < this.playBoard.length; row++) {
-      // console.log(`is row ${row} empty? ${this.isRowEmpty(row)}`);
-      if (this.isRowEmpty(row)) {
-        rowEmpty++;
-      }
-      for (let col = 0; col < this.playBoard.length; col++) {
-        // console.log(`is col ${col} empty? ${this.isColEmpty(col)}`);
-        if (this.isColEmpty(col)) {
-          colEmpty++;
+    let size = 3;
+    for (let n = 0; n < size; n++) {
+      if (row < size*(1+n)) {
+        for (let m = 0; m < size; m++) {
+          if (col < size*(1+m)) {
+            return m + (size*n);
+          }
         }
-        // console.log(`is block ${this.rowColToBlock(row,col)} empty? ${this.isBlockEmpty(row, col)}`);
-        // if (this.isBlockEmpty(row, col)) {
-        //   blockEmpty++;
-        // }
       }
-    }
-
-    if (rowEmpty > 0 && colEmpty > 0 /*&& blockEmpty > 0*/) {
-      return true;
-    } else {
-      return false;
-    }
-
-  }
-
-  isAnyDupl() {
-    let rowDupl = 0;
-    let colDupl = 0;
-    // let blockDupl = 0;
-
-    for (let row = 0; row < this.playBoard.length; row++) {
-      // console.log(`any duplicates in row ${row}? ${this.isRowDupl(row)}`);
-      if (this.isRowDupl(row)) {
-        rowDupl++;
-      }
-      for (let col = 0; col < this.playBoard.length; col++) {
-        // console.log(`any duplicates in col ${col}? ${this.isColDupl(col)}`);
-        if (this.isColDupl(col)) {
-          colDupl++;
-        }
-        // console.log(`any duplicates in block ${this.rowColToBlock(row,col)}? ${this.isBlockDupl(row,col)}`);
-        // if (this.isBlockDupl(row, col)) {
-        //   blockDupl++;
-        // }
-      }
-    }
-
-    if (rowDupl > 0 && colDupl > 0 /*&& blockDupl > 0*/) {
-      return true;
-    } else {
-      return false;
     }
   }
 
   isRowEmpty(row) {
-    //check for empty column
-    let digit = /[0-9]/;
-    let nonDigCount = 0;
-
-    for (let col = 0; col < this.playBoard.length; col++) {
-      if (!digit.test(this.playBoard[row][col])) {
-        nonDigCount += 1;
+    let found = 0;
+    for (let i = 0; i <this.freeCount; i ++) {
+      let elem = this.freeElem[String(i)];
+      if (elem.row === row && elem.number === 0) {
+        found += 1;
       }
     }
-
-    if (nonDigCount > 0) {
-      return true;
-    } else {
-      return false;
-	}
-  }
-
-  isRowDupl(row) {
-    //check the duplicates in row
-    let duplicates = [];
-
-    let col = 0;
-    while (col < this.playBoard.length && /\s/.test(this.playBoard[row][col])) {
-      col++;
-    }
-
-    let runningItems = [this.playBoard[row][col]];
-
-    col = 0;
-    while (col < this.playBoard.length) {
-      for (let i = 0; i < runningItems.length; i++) {
-		let currentNumber = this.playBoard[row][col];
-        if (!/\s/.test(currentNumber) && currentNumber === runningItems[i]) {
-          duplicates.push(runningItems[i]);
-        }
-      }
-      runningItems.push(this.playBoard[row][col]);
-      col++;
-    }
-    // console.log(duplicates);
-
-    if (duplicates.length > 1) {
+    if (found > 0) {
       return true;
     } else {
       return false;
     }
-
   }
 
   isColEmpty(col) {
-    //check for empty row
-    let digit = /[0-9]/;
-    let nonDigCount = 0;
-
-    for (let row = 0; row < this.playBoard.length; row++) {
-      if (!digit.test(this.playBoard[row][col])) {
-        nonDigCount += 1;
+    let found = 0;
+    for (let i = 0; i <this.freeCount; i ++) {
+      let elem = this.freeElem[String(i)];
+      if (elem.col === col && elem.number === 0) {
+        found += 1;
       }
     }
+    if (found > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-    if (nonDigCount > 0) {
+  isBlockEmpty(block) {
+    let found = 0;
+    for (let i = 0; i <this.freeCount; i ++) {
+      let elem = this.freeElem[String(i)];
+      if (elem.block === block && elem.number === 0) {
+        found += 1;
+      }
+    }
+    if (found > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  isAnyEmpty() {
+    let size = this.initBoard.length;
+    let rowEmptyCount = 0;
+    let colEmptyCount = 0;
+    for (let row = 0; row < size; row++) {
+      if (this.isRowEmpty(row)) {
+        rowEmptyCount++;
+      }
+      for (let col = 0; col < size; col++) {
+        if (this.isColEmpty(col)) {
+          colEmptyCount++;
+        }
+      }
+    }
+    if (rowEmptyCount > 0 || colEmptyCount > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  isRowDupl(row) {
+    let numbers = [];
+    for (let i = 0; i <this.freeCount; i ++) {
+      let elem = this.freeElem[String(i)];
+      if (elem.row === row && elem.number > 0) {
+        numbers.push(elem.number);
+      }
+    }
+    for (let i = 0; i <this.fixedCount; i ++) {
+      let elem = this.fixedElem[String(i)];
+      if (elem.row === row && elem.number > 0) {
+        numbers.push(elem.number);
+      }
+    }
+    let check = new Set(numbers);
+    if (numbers.length > check.size) {
       return true;
     } else {
       return false;
@@ -300,98 +198,73 @@ class Sudoku {
   }
 
   isColDupl(col) {
-    //check the duplicates in column
-
-    let duplicates = [];
-
-    let row = 0;
-    while (row < this.playBoard.length && /\s/.test(this.playBoard[row][col])) {
-		row++;
-	}
-
-    let runningItems = [this.playBoard[row][col]];
-
-    row = 0;
-      while (row < this.playBoard.length) {
-        for (let i = 0; i < runningItems.length; i++) {
-		  let currentNumber = this.playBoard[row][col];
-          if (!/\s/.test(currentNumber) && currentNumber === runningItems[i]) {
-            duplicates.push(runningItems[i]);
-          }
-        }
-        runningItems.push(this.playBoard[row][col]);
-        row++;
-      }
-
-      if (duplicates.length > 1) {
-        return true;
-      } else {
-        return false;
-      }
-
-  }
-
-  isBlockEmpty(block) {
-	//check for empty element
-	let digit = /[0-9]/;
-    let nonDigCount = 0;
-
-    for (let i = 0; i < this.smallBlocks[block]; i++) {
-      if (!digit.test(this.smallBlocks[block][i])) {
-        nonDigCount += 1;
+    let numbers = [];
+    for (let i = 0; i <this.freeCount; i ++) {
+      let elem = this.freeElem[String(i)];
+      if (elem.col === col && elem.number > 0) {
+        numbers.push(elem.number);
       }
     }
-
-    if (nonDigCount > 0) {
+    for (let i = 0; i <this.fixedCount; i ++) {
+      let elem = this.fixedElem[String(i)];
+      if (elem.col === col && elem.number > 0) {
+        numbers.push(elem.number);
+      }
+    }
+    let check = new Set(numbers);
+    if (numbers.length > check.size) {
       return true;
     } else {
       return false;
-	}
+    }
   }
 
-  isBlockDupl(row, col) {
-    //check the duplicates within the block
+  isBlockDupl(block) {
+    let numbers = [];
+    for (let i = 0; i <this.freeCount; i ++) {
+      let elem = this.freeElem[String(i)];
+      if (elem.block === block && elem.number > 0) {
+        numbers.push(elem.number);
+      }
+    }
+    for (let i = 0; i <this.fixedCount; i ++) {
+      let elem = this.fixedElem[String(i)];
+      if (elem.block === block && elem.number > 0) {
+        numbers.push(elem.number);
+      }
+    }
+    let check = new Set(numbers);
+    if (numbers.length > check.size) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-      let block = this.rowColToBlock(row, col);
-      let blockItem = this.smallBlocks[block];
-//     console.log(`Block: ${block}`);
-
-      let duplicates = [];
-
-      let index = 0;
-      let rowIndex = blockItem[index][0];
-      let colIndex = blockItem[index][1];
-      while (index < blockItem.length && /\s/.test(this.playBoard[rowIndex][colIndex])) {
-		index++;
-		rowIndex = blockItem[index][0];
-        colIndex = blockItem[index][1];
-   	  }
-
-      let runningItems = [this.playBoard[rowIndex][colIndex]];
-
-      index = 0;
-      while (index < blockItem.length) {
-		rowIndex = blockItem[index][0];
-        colIndex = blockItem[index][1];
-//        console.log(`Elem: ${blockItem[index]}`);
-        for (let i = 0; i < runningItems.length; i++) {
-		  let currentNumber = this.playBoard[rowIndex][colIndex];
-          if (!/\s/.test(currentNumber) && currentNumber === runningItems[i]) {
-            duplicates.push(runningItems[i]);
-          }
+  isAnyDupl() {
+    let size = this.initBoard.length;
+    let rowDuplCount = 0;
+    let colDuplCount = 0;
+    let blockDuplCount = 0;
+    for (let row = 0; row < size; row++) {
+      if (this.isRowDupl(row)) {
+        rowDuplCount++;
+      }
+      for (let col = 0; col < size; col++) {
+        let block = this.rowColToBlock(row, col);
+        if (this.isColDupl(col)) {
+          colDuplCount++;
         }
-        runningItems.push(this.playBoard[rowIndex][colIndex]);
-        index++;
+        if (this.isBlockDupl(block)) {
+          blockDuplCount++;
+        }
       }
-
-//      console.log(`Block duplicate: ${duplicates}`);
-      if (duplicates.length > 1) {
-        return true;
-
-      } else {
-        return false;
-      }
-
+    }
+    if (rowDuplCount > 0 || colDuplCount > 0 || blockDuplCount > 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }
@@ -401,19 +274,13 @@ class Sudoku {
 var fs = require('fs')
 var board_string = fs.readFileSync('set-01_sample.unsolved.txt')
   .toString()
-  .split("\n")[0]
+  .split("\n")[2]
 
 var game = new Sudoku(board_string)
 
 // Remember: this will just fill out what it can and not "guess"
-game.solve()
-
-// console.log(game.elements);
-console.log(game.initBoard);
-console.log();
-console.log(game.playBoard);
-//let block = 0;
-//let blockItem = game.smallBlocks[block];
-//console.log(blockItem[0]);
-console.log(game.isBlockDupl(1,8));
-console.log(game.isBlockDupl(2,2));
+game.board();
+console.log(game.showBoard());
+console.log()
+game.solve();
+console.log(game.showBoard());
