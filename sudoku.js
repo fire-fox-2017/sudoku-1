@@ -1,9 +1,28 @@
 "use strict"
 
 class Sudoku {
-  constructor(board_string) {}
+  constructor(board_string) {
+    this.rawNum = board_string;
+    this.board = this.generateBoard();
+    this.boardLength = 9;
+  }
 
-  solve() {}
+  generateBoard() {
+    let board = [];
+    let rawNumInArr = this.rawNum.split('');
+    for(let i = 0; i < this.boardLength; i++) {
+      board[i] = [];
+      for(let j = 0; j < this.boardLength; j++) {
+        board[i].push(Number(rawNumInArr[0]));
+        rawNumInArr.shift();
+      }
+    }
+    return board;
+  }
+
+  solve() {
+  
+  }
 
   // Returns a string representing the current state of the board
   board() {}
@@ -16,9 +35,13 @@ var board_string = fs.readFileSync('set-01_sample.unsolved.txt')
   .toString()
   .split("\n")[0]
 
-var game = new Sudoku(board_string)
+
+
+var game = new Sudoku(board_string);
+
+console.log(game.generateBoard());
 
 // Remember: this will just fill out what it can and not "guess"
-game.solve()
+// console.log(game.solve())
 
-console.log(game.board())
+// console.log(game.board())
