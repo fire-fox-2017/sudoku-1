@@ -71,9 +71,6 @@ class Sudoku {
       }
     }
     return true;
-
-
-
   }
 
   //hasil kesimpulan cek angka pada baris, kolom, dan kolom 3x3
@@ -124,5 +121,5 @@ var game = new Sudoku(board_string)
 // game.solve()
 
 console.log(game.board());
-// console.log('Hasil Sudoku');
-// console.log(game.solve());
+console.log('Hasil Sudoku');
+console.log(game.solve());
