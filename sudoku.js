@@ -20,7 +20,7 @@ class Sudoku {
           board[row][column]=value;
           found = true;
           arr = []
-          remaining.splice(remaining.indexOf(value),1)
+          remaining=this.getRemainingNumbers(board,row)
         } else {
           remaining.splice(remaining.indexOf(value),1)
           arr.push(value)
